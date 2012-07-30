@@ -50,7 +50,7 @@
 
     ##### Twigテンプレートでロケールを処理する
 
-    変更前: `{{ app.request.session.locale }}` or `{{ app.session.locale }}`
+    変更前: `{{ app.request.session.locale }}` もしくは `{{ app.session.locale }}`
 
     変更後: `{{ app.request.locale }}`
 
@@ -696,7 +696,7 @@
     $builder->addViewTransformer(new MyTransformer());
     ```
 
-  * The following events were deprecated and have a new equivalent:
+  * 以下のイベントは非推奨となり、新しい代替方法があります。
 
       * `FormEvents::SET_DATA`: `FormEvents::PRE_SET_DATA`
       * `FormEvents::BIND_CLIENT_DATA`: `FormEvents::PRE_BIND`

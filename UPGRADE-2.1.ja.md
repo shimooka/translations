@@ -144,7 +144,45 @@
 
   * ファイアウォール設定のための独自ファクトリは、エンドユーザーによって登録されるのではなく、バンドルの構築中に登録されるようになりました。このため、セキュリティ設定中の 'factories' キーを削除する必要があります。
 
-  * FirewallリスナーはRouterリスナーの後に登録されます。この結果、特定のファイアウォールURL (/login_check や /logout など)は正確なルートをルーティング設定に記述しなければなりません。
+    Before:
+
+     ``` yaml
+     security:
+       factories:
+         - "%kernel.root_dir%/../src/Acme/DemoBundle/Resources/config/security_factories.yml"
+     ```
+
+     ``` yaml
+     # src/Acme/DemoBundle/Resources/config/security_factories.yml
+     services:
+         security.authentication.factory.custom:
+             class:  Acme\DemoBundle\DependencyInjection\Security\Factory\CustomFactory
+             tags:
+                 - { name: security.listener.factory }
+     ```
+
+     After:
+
+      ```
+      namespace Acme\DemoBundle;
+
+      use Symfony\Component\HttpKernel\Bundle\Bundle;
+      use Symfony\Component\DependencyInjection\ContainerBuilder;
+      use Acme\DemoBundle\DependencyInjection\Security\Factory\CustomFactory;
+
+      class AcmeDemoBundle extends Bundle
+      {
+          public function build(ContainerBuilder $container)
+          {
+              parent::build($container);
+
+              $extension = $container->getExtension('security');
+              $extension->addSecurityListenerFactory(new CustomFactory());
+          }
+      }
+      ```
+
+  * ファイアウォールリスナーはRouterリスナーの後に登録されます。この結果、特定のファイアウォールURL (/login_check や /logout など)は正確なルートをルーティング設定に記述しなければなりません。
 
   * ユーザープロバイダ設定がリファクタリングされ、プロバイダのチェインやメモリプロバイダの設定が変更されました。
 
@@ -428,9 +466,7 @@
 
     デフォルトでは、選択肢の値を追加する代わりに、生成された整数が追加されます。JavaScriptがこれに依存している場合は注意してください。実際の選択肢の値を参照したい場合は、代わりに `value` 属性を参照してください。
 
-  * choiceフィールドタイプのテンプレートで、`choices` 変数の構成が変更されました。
-
-    `choices` 変数は、選択肢のデータを参照するための `getValue()` と `getLabel()` という2つのゲッターを持つ `ChoiceView` オブジェクトを含みます。
+  * choiceフィールドタイプのテンプレートで、選択された項目を特定するために利用されていた `_form_is_choice_selected` メソッドは `selectedchoice` フィルターに置き換えられました。
 
     変更前:
 
@@ -445,9 +481,9 @@
     変更後:
 
     ```
-    {% for choice in choices %}
-        <option value="{{ choice.value }}"{% if _form_is_choice_selected(form, choice) %} selected="selected"{% endif %}>
-            {{ choice.label }}
+    {% for choice, label in choices %}
+        <option value="{{ choice.value }}"{% if choice is selectedchoice(choice.value) %} selected="selected"{% endif %}>
+            {{ label }}
         </option>
     {% endfor %}
     ```
@@ -1130,6 +1166,25 @@
     ```
     /** @Assert\Length(min = 8) */
     private $password;
+    ```
+
+  * The classes `ValidatorContext` and `ValidatorFactory` were deprecated and
+    will be removed in Symfony 2.3. You should use the new entry point
+    `Validation` instead.
+
+    Before:
+
+    ```
+    $validator = ValidatorFactory::buildDefault(array('path/to/mapping.xml'))
+        ->getValidator();
+    ```
+
+    After:
+
+    ```
+    $validator = Validation::createValidatorBuilder()
+        ->addXmlMapping('path/to/mapping.xml')
+        ->getValidator();
     ```
 
 ### セッション

@@ -144,7 +144,7 @@
 
   * ファイアウォール設定のための独自ファクトリは、エンドユーザーによって登録されるのではなく、バンドルの構築中に登録されるようになりました。このため、セキュリティ設定中の 'factories' キーを削除する必要があります。
 
-    Before:
+    変更前:
 
      ``` yaml
      security:
@@ -161,7 +161,7 @@
                  - { name: security.listener.factory }
      ```
 
-     After:
+     変更後:
 
       ```
       namespace Acme\DemoBundle;
@@ -1168,18 +1168,16 @@
     private $password;
     ```
 
-  * The classes `ValidatorContext` and `ValidatorFactory` were deprecated and
-    will be removed in Symfony 2.3. You should use the new entry point
-    `Validation` instead.
+  * `ValidatorContext` クラスと `ValidatorFactory` クラスは非推奨となり、Symfony 2.3 で削除されます。代わりに、新しいエントリポイントである `Validation` クラスを使用してください。
 
-    Before:
+    変更前:
 
     ```
     $validator = ValidatorFactory::buildDefault(array('path/to/mapping.xml'))
         ->getValidator();
     ```
 
-    After:
+    変更後:
 
     ```
     $validator = Validation::createValidatorBuilder()

@@ -182,7 +182,7 @@
       }
       ```
 
-  * ファイアウォールリスナーはRouterリスナーの後に登録されます。この結果、特定のファイアウォールURL (/login_check や /logout など)は正確なルートをルーティング設定に記述しなければなりません。
+  * ファイアウォールリスナーはRouterリスナーの後に登録されます。この結果、特定のファイアウォールURL (/login_check や /logout など)は正確なルートをルーティング設定に記述しなければなりません。また、独自の 404 エラーページがある場合、そのページに `is_granted` などのセキュリティに関連する設定がなされていないことを確認してください。
 
   * ユーザープロバイダ設定がリファクタリングされ、プロバイダのチェインやメモリプロバイダの設定が変更されました。
 
@@ -224,9 +224,9 @@
      use Symfony\Bundle\SecurityBundle\Validator\Constraint\UserPassword;
      use Symfony\Bundle\SecurityBundle\Validator\Constraint as SecurityAssert;
      ```
-     
+
      変更後:
-     
+
      ```
      use Symfony\Component\Security\Core\Validator\Constraint\UserPassword;
      use Symfony\Component\Security\Core\Validator\Constraint as SecurityAssert;

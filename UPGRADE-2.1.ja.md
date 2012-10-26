@@ -374,20 +374,10 @@
 
   * コレクションタイプのテンプレートでは、プロトタイプフィールドのデフォルト名は `$$name$$` から `__name__` に変更されました。
 
-    独自名にドル記号は戦闘や末尾に追加することはできません。フィールドの "prototype_name" に指定する値には、2つのアンダースコアを前後に追加するようにしてください。
-
-    変更前:
+    "prototype_name" オプションを変更することで、プロトタイプフィールドの名前をカスタマイズすることができます。フィールドの "prototype_name" に指定する値には、2つのアンダースコアを前後に追加するようにしてください。
 
     ```
-    $builder->add('tags', 'collection', array('prototype' => 'proto'));
-
-    // テンプレートでは "$$proto$$" という名前になる
-    ```
-
-    変更後:
-
-    ```
-    $builder->add('tags', 'collection', array('prototype' => '__proto__'));
+    $builder->add('tags', 'collection', array('prototype_name' => '__proto__'));
 
     // テンプレートでは "__proto__" という名前になる
     ```
@@ -466,25 +456,41 @@
 
     デフォルトでは、選択肢の値を追加する代わりに、生成された整数が追加されます。JavaScriptがこれに依存している場合は注意してください。実際の選択肢の値を参照したい場合は、代わりに `value` 属性を参照してください。
 
-  * choiceフィールドタイプのテンプレートで、選択された項目を特定するために利用されていた `_form_is_choice_selected` メソッドは `selectedchoice` フィルターに置き換えられました。
+  * choiceフィールドタイプのテンプレートで、選択された項目を特定するために利用されていた `_form_is_choice_selected` メソッドは `selectedchoice` フィルターに置き換えられました。同様に、choiceフィールドがグルーピングされているかどうかをチェックするための `_form_is_choice_group` メソッドは削除され、`iterable` テストを用いてチェックできるようになりました。
 
     変更前:
 
     ```
     {% for choice, label in choices %}
-        <option value="{{ choice }}"{% if _form_is_choice_selected(form, choice) %} selected="selected"{% endif %}>
-            {{ label }}
-        </option>
+        {% if _form_is_choice_group(label) %}
+            <optgroup label="{{ choice|trans }}">
+                {% for nestedChoice, nestedLabel in label %}
+                    ... options tags ...
+                {% endfor %}
+            </optgroup>
+        {% else %}
+            <option value="{{ choice }}"{% if _form_is_choice_selected(form, choice) %} selected="selected"{% endif %}>
+                {{ label }}
+            </option>
+        {% endif %}
     {% endfor %}
     ```
 
     変更後:
 
     ```
-    {% for choice, label in choices %}
-        <option value="{{ choice.value }}"{% if choice is selectedchoice(choice.value) %} selected="selected"{% endif %}>
-            {{ label }}
-        </option>
+    {% for label, choice in choices %}
+        {% if choice is iterable %}
+            <optgroup label="{{ label|trans({}, translation_domain) }}">
+                {% for nestedChoice, nestedLabel in choice %}
+                    ... options tags ...
+                {% endfor %}
+            </optgroup>
+        {% else %}
+            <option value="{{ choice.value }}"{% if choice is selectedchoice(choice.value) %} selected="selected"{% endif %}>
+                {{ label }}
+            </option>
+        {% endif %}
     {% endfor %}
     ```
 

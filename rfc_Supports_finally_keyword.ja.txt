@@ -1,0 +1,117 @@
+====== Request for Comments: Supports finally keyword ======
+  * Version: 1.0
+  * Date: 2012/07/24
+  * Author: Xinchen Hui <laruence@php.net>
+  * Status: Implemented
+  * First Published at: http://wiki.php.net/rfc/finally
+  * Alternative Reading: <Finally Getting finally In PHP?> http://sheriframadan.com/2012/08/finally-keyword-in-php/  by GoogleGuy
+
+===== Introduction =====
+このRFCは、FR #32100, #36779でリクエストされた例外発生時の 'finally' サポートについての導入です。
+この機能がない場合、利用者は処理できない例外が発生した時に以下のような後処理を行うコードを記述しなければなりません。
+
+<code php>
+<?php
+$db = mysqli_connect();
+try {
+   call_some_function($db);
+} catch (Exception $e) {
+   mysqli_close($db);
+   throw $e;
+}
+mysql_close($db);
+</code>
+
+finallyを導入することは、このような状況で1,2行短くすることではなく、このような問題を処理するためのより正しい方法を提供することです。
+
+===== Proposal =====
+finallyブロックはtryブロックが終了するときに常に実行されます。これは、finallyブロックが予期しない例外が発生した場合でも実行される、ということを保証します。しかし、finallyはただ例外処理のためだけではなく、より有効です。たとえば、returnやcontinue、breakによって後処理のコードが迂回されるのを防ぐ、といったことです。finallyブロックに後処理コードを記述することは常に、たとえ例外が予測されていない場合でさえも、良いプラクティスです。
+
+<code php>
+<?php
+$db = mysqli_connect();
+try {
+   call_some_function($db);//この関数は処理できない例外を投げるかも知れない
+} finally {
+   mysqli_close($db);
+}
+</code>
+
+最も間違えやすい部分は "try/catchブロック中のreturn"です。この場合でもfinallyブロックはコールされます。
+
+<code php>
+<?php
+  try {
+    return 2;
+  } finally {
+    echo "this will be called\n";
+  }
+  //ここは決してコールされない
+  echo "you can not see me";
+
+</code>
+
+上のスクリプトは以下のように出力します:
+<code>
+this will be called
+//return int(2)
+</code>
+
+また、以下のようなネストしたtry catch finally:
+<code php>
+<?php
+function foo ($a) {
+   try {
+      echo "1";
+      try {
+        echo "2";
+        throw new Exception("ex");
+      } catch (Exception $e) {
+        echo "3";
+      } finally {
+        echo "4";
+        throw new Exception("ex");
+      } 
+   } catch (Exception $e) {
+      echo "3";
+   } finally {
+      echo "2";
+   }
+   return 1;
+}
+
+var_dump(foo("para"));
+</code>
+
+では、以下のように出力されます:
+<code>
+123432int(1)
+</code>
+
+
+以下にあるTests & Examplesセクションに、多くのエッジケースについての例があります。
+===== Patch =====
+  * Patch: https://github.com/laruence/php-src/tree/finally
+===== Tests & Examples =====
+      * https://github.com/laruence/php-src/blob/finally/Zend/tests/catch_finally_001.phpt
+      * https://github.com/laruence/php-src/blob/finally/Zend/tests/catch_finally_002.phpt
+      * https://github.com/laruence/php-src/blob/finally/Zend/tests/catch_finally_003.phpt
+      * https://github.com/laruence/php-src/blob/finally/Zend/tests/catch_finally_004.phpt
+      * https://github.com/laruence/php-src/blob/finally/Zend/tests/catch_finally_005.phpt
+      * https://github.com/laruence/php-src/blob/finally/Zend/tests/catch_finally_006.phpt
+      * https://github.com/laruence/php-src/blob/finally/Zend/tests/try_finally_001.phpt
+      * https://github.com/laruence/php-src/blob/finally/Zend/tests/try_finally_002.phpt
+      * https://github.com/laruence/php-src/blob/finally/Zend/tests/try_finally_003.phpt
+
+===== Vote =====
+<doodle 
+title="Should the implementation be merged into trunk?" auth="laruence" voteType="single" closed="true">
+   * Yes
+   * No
+</doodle>
+===== Changelog =====
+  * 2012/07/24 Xinchen Hui: Initial version
+  * 2012/07/26 Xinchen Hui: Update RFC  
+  * 2012/08/06 Xinchen Hui: Open voting
+  * 2012/08/13 Xinchen Hui: Close voting, RFC win the voting
+  * 2012/08/15 Xinchen Hui: Committed

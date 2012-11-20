@@ -6,7 +6,7 @@
   * First Published at: http://wiki.php.net/rfc/finally
   * Alternative Reading: <Finally Getting finally In PHP?> http://sheriframadan.com/2012/08/finally-keyword-in-php/  by GoogleGuy
 
-===== Introduction =====
+===== 導入 =====
 このRFCは、FR #32100, #36779でリクエストされた例外発生時の 'finally' サポートについての導入です。
 この機能がない場合、利用者は処理できない例外が発生した時に以下のような後処理を行うコードを記述しなければなりません。
 
@@ -24,7 +24,7 @@ mysql_close($db);
 
 finallyを導入することは、このような状況で1,2行短くすることではなく、このような問題を処理するためのより正しい方法を提供することです。
 
-===== Proposal =====
+===== 提案 =====
 finallyブロックはtryブロックが終了するときに常に実行されます。これは、finallyブロックが予期しない例外が発生した場合でも実行される、ということを保証します。しかし、finallyはただ例外処理のためだけではなく、より有効です。たとえば、returnやcontinue、breakによって後処理のコードが迂回されるのを防ぐ、といったことです。finallyブロックに後処理コードを記述することは常に、たとえ例外が予測されていない場合でさえも、良いプラクティスです。
 
 <code php>
@@ -90,7 +90,7 @@ var_dump(foo("para"));
 
 
 以下にあるTests & Examplesセクションに、多くのエッジケースについての例があります。
-===== Patch =====
+===== パッチ =====
   * Patch: https://github.com/laruence/php-src/tree/finally
 ===== Tests & Examples =====
       * https://github.com/laruence/php-src/blob/finally/Zend/tests/catch_finally_001.phpt

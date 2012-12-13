@@ -11,5 +11,5 @@
 
 ### rfc_Supports_finally_keyword.ja.txt
 
- * PHP WikiのRequest for Comments: Supports finally keyword(https://wiki.php.net/rfc/finally)の日本語訳です
+ * PHP WikiのRequest for Comments: Supports finally keyword ( https://wiki.php.net/rfc/finally ) の日本語訳です
 

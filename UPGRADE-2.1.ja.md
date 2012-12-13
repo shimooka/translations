@@ -23,6 +23,7 @@
     このため、AppKernel.php 内にあるバンドルの名前空間を変更する必要があります。
 
     変更前: `new Symfony\Bundle\DoctrineBundle\DoctrineBundle()`
+
     変更後: `new Doctrine\Bundle\DoctrineBundle\DoctrineBundle()`
 
 ### HttpFoundation
@@ -46,8 +47,6 @@
         default_locale: fr
     ```
 
-  * `Request` クラスの `getPathInfo()`, `getBaseUrl()`, `getBasePath()` の各メソッドは生の値を返します(以前はurdecodeされた値)。これらのメソッドをコールする場合、必要であれば `rawurldecode()` でチェックしたりラップしなければなりません。
-
     ##### Twigテンプレートでロケールを処理する
 
     変更前: `{{ app.request.session.locale }}` もしくは `{{ app.session.locale }}`
@@ -66,11 +65,9 @@
 
     変更後: `$request->getLocale()`
 
-### HttpFoundation
+    ##### 従来の動作をシミュレートする
 
- * ユーザーに対する現在のロケールはセッションに保存されません。
-
-   リクエスト中にあるロケール値を操作するパラメータが `_locale` の場合、以下の様なリスナーを登録することで、従来の動作をシミュレートすることができます。
+    リクエスト中にあるロケール値を操作するパラメータが `_locale` の場合、以下の様なリスナーを登録することで、ユーザーのロケールをセッションに保存する、という動作をシミュレートすることができます。
 
    ```
    namespace XXX;
@@ -111,6 +108,9 @@
        }
    }
    ```
+
+  * `Request` クラスの `getPathInfo()`, `getBaseUrl()`, `getBasePath()` の各メソッドは生の値を返します(以前はurdecodeされた値)。これらのメソッドをコールする場合、必要であれば `rawurldecode()` でチェックしたりラップしなければなりません。
+
 
 ### Security
 
@@ -487,7 +487,7 @@
                 {% endfor %}
             </optgroup>
         {% else %}
-            <option value="{{ choice.value }}"{% if choice is selectedchoice(choice.value) %} selected="selected"{% endif %}>
+            <option value="{{ choice.value }}"{% if choice is selectedchoice(value) %} selected="selected"{% endif %}>
                 {{ label }}
             </option>
         {% endif %}
@@ -1192,6 +1192,8 @@
     ```
 
 ### セッション
+
+  * Session クラスの名前空間が、`Symfony\Component\HttpFoundation\Session` から `Symfony\Component\HttpFoundation\Session\Session` に変更されました。
 
   * フラッシュメッセージを処理するために `get` を使用した場合、配列を返すようになりました。
 
